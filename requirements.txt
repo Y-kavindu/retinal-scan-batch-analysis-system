@@ -1,0 +1,18 @@
+# Web Framework
+Flask>=2.0
+
+# Deep Learning Framework
+tensorflow>=2.8
+
+# Numerical Operations
+numpy>=1.21
+
+# Image Processing
+Pillow>=9.0
+
+# For Colab Notebook (if needed in the same environment)
+opendatasets
+pandas
+scikit-learn
+matplotlib
+seaborn
