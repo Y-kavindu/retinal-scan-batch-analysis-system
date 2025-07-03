@@ -10,6 +10,8 @@ import google.generativeai as genai
 import shutil
 
 # --- Configuration and Initialization ---
+from dotenv import load_dotenv
+load_dotenv()
 
 # Initialize the Flask application
 app = Flask(__name__)
