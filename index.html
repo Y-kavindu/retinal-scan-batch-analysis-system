@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Retinal Scan Analysis</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body { background-color: #f8f9fa; }
+        .container { max-width: 800px; }
+        .header { padding: 2rem 0; text-align: center; }
+        .upload-section { background-color: #ffffff; padding: 2rem; border-radius: 0.5rem; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
+        .results-section { margin-top: 2rem; }
+        .card { margin-bottom: 1.5rem; }
+        .card-header { font-weight: bold; }
+        .list-group-item { display: flex; justify-content: space-between; align-items: center; }
+        .badge { font-size: 100%; }
+        .high-risk { color: #dc3545; font-weight: bold; }
+        .low-risk { color: #28a745; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Retinal Scan Batch Analysis</h1>
+            <p class="lead">Upload one or more retinal fundus images for classification.</p>
+        </div>
+
+        <div class="upload-section">
+            <form action="/predict" method="post" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="files">Select images:</label>
+                    <input type="file" class="form-control-file" name="files" id="files" multiple required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Analyze Images</button>
+            </form>
+        </div>
+
+        {% if results %}
+        <div class="results-section">
+            <h2 class="text-center mb-4">Analysis Results</h2>
+            {% for result in results %}
+            <div class="card">
+                <div class="card-header">
+                    {{ result.filename }}
+                </div>
+                <ul class="list-group list-group-flush">
+                    {% for disease, prob in result.predictions.items() %}
+                    <li class="list-group-item">
+                        <span>{{ disease }}</span>
+                        {% set p = prob * 100 %}
+                        <span class="badge badge-pill {% if p > 50 and disease != 'Normal' %}badge-danger{% elif p > 20 and disease != 'Normal' %}badge-warning{% else %}badge-light{% endif %}">
+                            {{ "%.2f"|format(p) }}%
+                        </span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
