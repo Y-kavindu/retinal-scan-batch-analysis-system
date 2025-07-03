@@ -1,7 +1,7 @@
 # Web Framework
 Flask>=2.0
 
-# Deep Learning Framework
+# Deep Learning Framework (CPU version is generally fine for inference)
 tensorflow>=2.8
 
 # Numerical Operations
@@ -10,7 +10,13 @@ numpy>=1.21
 # Image Processing
 Pillow>=9.0
 
-# For Colab Notebook (if needed in the same environment)
+# PDF Processing
+PyMuPDF>=1.23.0
+
+# Google Gemini API
+google-generativeai>=0.4.0
+
+# For running the notebook
 opendatasets
 pandas
 scikit-learn

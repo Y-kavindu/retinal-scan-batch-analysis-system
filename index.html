@@ -1,60 +1,111 @@
+<!-- templates/index.html -->
+
 <!doctype html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Retinal Scan Analysis</title>
+    <title>Comprehensive Patient Report Analysis</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
-        body { background-color: #f8f9fa; }
-        .container { max-width: 800px; }
+        body { background-color: #f0f2f5; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+        .container { max-width: 1100px; }
         .header { padding: 2rem 0; text-align: center; }
-        .upload-section { background-color: #ffffff; padding: 2rem; border-radius: 0.5rem; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
-        .results-section { margin-top: 2rem; }
-        .card { margin-bottom: 1.5rem; }
-        .card-header { font-weight: bold; }
-        .list-group-item { display: flex; justify-content: space-between; align-items: center; }
-        .badge { font-size: 100%; }
-        .high-risk { color: #dc3545; font-weight: bold; }
-        .low-risk { color: #28a745; }
+        .header h1 { font-weight: 700; }
+        .upload-section { background-color: #ffffff; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .results-container { margin-top: 2.5rem; }
+        .result-card { background-color: #fff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 2rem; }
+        .result-card-header { padding: 1rem 1.5rem; background-color: #6c757d; color: white; font-weight: 600; border-top-left-radius: 8px; border-top-right-radius: 8px; }
+        .result-card-body { padding: 1.5rem; }
+        .section-title { font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; border-bottom: 2px solid #e9ecef; padding-bottom: 0.5rem; color: #343a40; }
+        .ai-overview { background-color: #e7f3ff; border-left: 5px solid #007bff; padding: 1.5rem; border-radius: 5px; margin-bottom: 1.5rem; }
+        .extracted-text-section { max-height: 200px; overflow-y: auto; background-color: #f8f9fa; padding: 1rem; border-radius: 5px; white-space: pre-wrap; font-family: monospace; }
+        .image-analysis-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
+        .image-card { border: 1px solid #dee2e6; border-radius: 5px; }
+        .image-card-header { font-weight: 500; background-color: #f8f9fa; padding: 0.75rem; }
+        .list-group-item { display: flex; justify-content: space-between; align-items: center; border-left: 0; border-right: 0; padding: 0.75rem 1rem; }
+        .list-group-item:first-child { border-top: 0; }
+        .badge { font-size: 90%; font-weight: bold; }
+        .alert { margin-top: 1rem; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>Retinal Scan Batch Analysis</h1>
-            <p class="lead">Upload one or more retinal fundus images for classification.</p>
+            <h1>Comprehensive Patient Report Analysis</h1>
+            <p class="lead">Upload patient reports (PDF) or retinal scans (JPG, PNG) for a full AI-powered analysis.</p>
         </div>
 
         <div class="upload-section">
             <form action="/predict" method="post" enctype="multipart/form-data">
                 <div class="form-group">
-                    <label for="files">Select images:</label>
-                    <input type="file" class="form-control-file" name="files" id="files" multiple required>
+                    <label for="files"><strong>Select files for analysis:</strong></label>
+                    <input type="file" class="form-control-file" name="files" id="files" multiple required accept="image/*,.pdf">
                 </div>
-                <button type="submit" class="btn btn-primary btn-block">Analyze Images</button>
+                <button type="submit" class="btn btn-primary btn-lg btn-block mt-3">Analyze Files</button>
             </form>
+            {% if error %}
+                <div class="alert alert-danger mt-3">{{ error }}</div>
+            {% endif %}
         </div>
 
         {% if results %}
-        <div class="results-section">
-            <h2 class="text-center mb-4">Analysis Results</h2>
+        <div class="results-container">
             {% for result in results %}
-            <div class="card">
-                <div class="card-header">
-                    {{ result.filename }}
+            <div class="result-card">
+                <div class="result-card-header">
+                    Analysis for: {{ result.filename }}
                 </div>
-                <ul class="list-group list-group-flush">
-                    {% for disease, prob in result.predictions.items() %}
-                    <li class="list-group-item">
-                        <span>{{ disease }}</span>
-                        {% set p = prob * 100 %}
-                        <span class="badge badge-pill {% if p > 50 and disease != 'Normal' %}badge-danger{% elif p > 20 and disease != 'Normal' %}badge-warning{% else %}badge-light{% endif %}">
-                            {{ "%.2f"|format(p) }}%
-                        </span>
-                    </li>
-                    {% endfor %}
-                </ul>
+                <div class="result-card-body">
+                    {% if result.error %}
+                        <div class="alert alert-warning">{{ result.error }}</div>
+                    {% else %}
+                        <!-- AI Overview Section -->
+                        <div class="mb-4">
+                            <h5 class="section-title">AI-Generated Overview</h5>
+                            <div class="ai-overview">
+                                <p class="mb-0">{{ result.ai_overview | safe }}</p>
+                            </div>
+                        </div>
+
+                        <!-- Extracted Text Section (for PDFs) -->
+                        {% if result.filename.lower().endswith('.pdf') %}
+                        <div class="mb-4">
+                             <h5 class="section-title">Extracted Report Text</h5>
+                             <div class="extracted-text-section">{{ result.extracted_text }}</div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Image Analysis Section -->
+                        <div>
+                            <h5 class="section-title">Retinal Image Analysis</h5>
+                            <div class="image-analysis-grid">
+                                {% for analysis in result.image_analyses %}
+                                <div class="image-card">
+                                    <div class="image-card-header">{{ analysis.filename }}</div>
+                                    <ul class="list-group list-group-flush">
+                                        {% for disease, prob in analysis.predictions.items() %}
+                                        <li class="list-group-item">
+                                            <span>{{ disease }}</span>
+                                            {% set p = prob * 100 %}
+                                            {% if p > 50 and disease != 'Normal' %}
+                                                <span class="badge badge-danger">{{ "%.2f"|format(p) }}%</span>
+                                            {% elif p > 20 and disease != 'Normal' %}
+                                                <span class="badge badge-warning">{{ "%.2f"|format(p) }}%</span>
+                                            {% elif p > 50 and disease == 'Normal' %}
+                                                <span class="badge badge-success">{{ "%.2f"|format(p) }}%</span>
+                                            {% else %}
+                                                 <span class="badge badge-light text-dark">{{ "%.2f"|format(p) }}%</span>
+                                            {% endif %}
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
             </div>
             {% endfor %}
         </div>
