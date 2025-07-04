@@ -1,6 +1,9 @@
 # Web Framework
 Flask>=2.0
 
+# To load environment variables
+python-dotenv>=0.19
+
 # Deep Learning Framework (CPU version is generally fine for inference)
 tensorflow>=2.8
 
